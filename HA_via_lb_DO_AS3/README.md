@@ -6,10 +6,7 @@
 - [Prerequisites](#prerequisites)
 - [Important Configuration Notes](#important-configuration-notes)
 - [Security](#security)
-- [Getting Help](#help)
-- [Installation](#installation)
 - [Configuration Example](#configuration-example)
-- [Service Discovery](#service-discovery)
 
 ## Introduction
 
@@ -96,7 +93,7 @@ As an alternative to deploying through the Azure Portal (GUI) each solution prov
 
 The following is an example configuration diagram for this solution deployment. In this scenario, all access to the BIG-IP VE cluster (Active/Active) is through an ALB. The IP addresses in this example may be different in your implementation.
 
-![Configuration Example](../images/HA_via_lb_2nics.png)
+![Configuration Example](./HA_via_lb_2nics.png)
 
 
 ## Documentation
