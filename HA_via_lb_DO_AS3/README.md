@@ -22,11 +22,11 @@ The BIG-IP VEs have the [Local Traffic Manager (LTM)](https://f5.com/products/bi
 ## Prerequisites
 
 - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the character **#**.  Additionally, there are a number of other special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details.
-- Since you are deploying the BYOL template, you must have a valid BIG-IP license token.
+- This template requires a service principal.  See the [Service Principal Setup section](#service-principal-authentication) for details, including required permissions.
 
 ## Important configuration notes
 
-- This template would require Declarative Onboarding and AS3 for the initial configuration. As part of the onboarding script, it will download the RPMs respectively. So please see the [AS3 documentation](https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/3.5.1/) and [DO documentation](https://clouddocs.f5.com/products/extensions/f5-declarative-onboarding/latest/prereqs.html) for details on how to use AS3 and Declarative Onboarding on your BIG-IP VE(s). 
+- This template would require Declarative Onboarding and AS3 packages for the initial configuration. As part of the onboarding script, it will download the RPMs respectively. So please see the [AS3 documentation](https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/3.5.1/) and [DO documentation](https://clouddocs.f5.com/products/extensions/f5-declarative-onboarding/latest/prereqs.html) for details on how to use AS3 and Declarative Onboarding on your BIG-IP VE(s). 
 - This template uses PayGo BIGIP image for the deployment (as default). If you would like to use BYOL, then these following steps are needed:
   a) in the "variable.tf", specify the BYOL image and licenses regkeys
   b) in the "main.tf", uncomment the "local_sku" lines
@@ -36,85 +36,34 @@ The BIG-IP VEs have the [Local Traffic Manager (LTM)](https://f5.com/products/bi
             "licenseType": "regKey",
             "regKey": "${local_sku}"
           },
-- You have the option of using a password or SSH public key for authentication.  If you choose to use an SSH public key and want access to the BIG-IP web-based Configuration utility, you must first SSH into the BIG-IP VE using the SSH key you provided in the template.  You can then create a user account with admin-level permissions on the BIG-IP VE to allow access if necessary.
-- See the important note about [optionally changing the BIG-IP Management port](#changing-the-big-ip-configuration-utility-gui-port).
-- This template supports service discovery.  See the [Service Discovery section](#service-discovery) for details.
-- F5 has created an iApp for configuring logging for BIG-IP modules to be sent to a specific set of cloud analytics solutions.  See [Logging iApp](#logging-iapp).
-- This template can send non-identifiable statistical information to F5 Networks to help us improve our templates.  See [Sending statistical information to F5](#sending-statistical-information-to-f5).
-- This template can be used to create the BIG-IP(s) using a local VHD or Microsoft.Compute image, please see the **customImage** parameter description for more details.
 - In order to pass traffic from your clients to the servers, after launching the template, you must create virtual server(s) on the BIG-IP VE.  See [Creating a virtual server](#creating-virtual-servers-on-the-big-ip-ve).
-- F5 has created a matrix that contains all of the tagged releases of the F5 ARM templates for Microsoft Azure and the corresponding BIG-IP versions, license types and throughputs available for a specific tagged release. See [azure-bigip-version-matrix](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-bigip-version-matrix.md).
-- F5 ARM templates now capture all deployment logs to the BIG-IP VE in **/var/log/cloud/azure**.  Depending on which template you are using, this includes deployment logs (stdout/stderr), f5-cloud-libs execution logs, recurring solution logs (failover, metrics, and so on), and more.
-- Supported F5 ARM templates do not reconfigure existing Azure resources, such as network security groups.  Depending on your configuration, you may need to configure these resources to allow the BIG-IP VE(s) to receive traffic for your application.  Similarly, templates that deploy Azure load balancer(s) do not configure load balancing rules or probes on those resources to forward external traffic to the BIG-IP(s).  You must create these resources after the deployment has succeeded.
 - See the **[Configuration Example](#configuration-example)** section for a configuration diagram and description for this solution.
-- **NEW:**  Beginning with release 5.3.0.0, the BIG-IP image names have changed (previous options were Good, Better, and Best).  Now you choose a BIG-IP VE image based on whether you need [LTM](https://www.f5.com/products/big-ip-services/local-traffic-manager) only (name starts with **LTM**) or All modules (image name starts with **All**) available (including [WAF](https://www.f5.com/products/security/advanced-waf), [AFM](https://www.f5.com/products/security/advanced-firewall-manager), etc.), and if you need 1 or 2 boot locations.  Use 2 boot locations if you expect to upgrade the BIG-IP VE in the future. If you do not need room to upgrade (if you intend to create a new instance when a new version of BIG-IP VE is released), use an image with 1 boot location.  See this [Matrix](https://clouddocs.f5.com/cloud/public/v1/matrix.html#microsoft-azure) for recommended Azure instance types. See the Supported BIG-IP Versions table for the available options for different BIG-IP versions.
-- When failover occurs, UDRs will be updated across multiple Azure subscriptions.
-
-## Security
-
-This ARM template downloads helper code to configure the BIG-IP system. If you want to verify the integrity of the template, you can open the template and ensure the following lines are present. See [Security Detail](#security-details) for the exact code.
-In the *variables* section:
-
-- In the *verifyHash* variable: **script-signature** and then a hashed signature.
-- In the *installCloudLibs* variable: **tmsh load sys config merge file /config/verifyHash**.
-- In the *installCloudLibs* variable: ensure this includes **tmsh run cli script verifyHash /config/cloud/f5-cloud-libs.tar.gz**.
-
-Additionally, F5 provides checksums for all of our supported templates. For instructions and the checksums to compare against, see [checksums-for-f5-supported-cft-and-arm-templates-on-github](https://devcentral.f5.com/codeshare/checksums-for-f5-supported-cft-and-arm-templates-on-github-1014).
-
-## Supported BIG-IP versions
-
-The following is a map that shows the available options for the template parameter **bigIpVersion** as it corresponds to the BIG-IP version itself. Only the latest version of BIG-IP VE is posted in the Azure Marketplace. For older versions, see downloads.f5.com.
-
-| Azure BIG-IP Image Version | BIG-IP Version | Important: Boot location options note |
-| --- | --- | --- |
-| 13.1.100000 | 13.1.1 Build 0.0.4 | Both One and Two Boot Location options are available |
-| 12.1.303000 | 12.1.3.3 Build 0.0.1 | Only Two Boot Location options exist. Even if you select a One Boot Location in the template, Two Boot Locations are created |
-| latest | This will select the latest BIG-IP version available | Only Two Boot Location options exist. Even if you select a One Boot Location in the template, Two Boot Locations are created |
-
-## Supported instance types and hypervisors
-
-- For a list of supported Azure instance types for this solution, see the [Azure instances for BIG-IP VE](http://clouddocs.f5.com/cloud/public/v1/azure/Azure_singleNIC.html#azure-instances-for-big-ip-ve).
-
-- For a list of versions of the BIG-IP Virtual Edition (VE) and F5 licenses that are supported on specific hypervisors and Microsoft Azure, see [supported-hypervisor-matrix](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/ve-supported-hypervisor-matrix.html).
-
-## Help
-
-Because this template has been created and fully tested by F5 Networks, it is fully supported by F5. This means you can get assistance if necessary from [F5 Technical Support](https://support.f5.com/csp/article/K40701984).
-
-### Community Help
-
-We encourage you to use our [Slack channel](https://f5cloudsolutions.herokuapp.com) for discussion and assistance on F5 ARM templates. There are F5 employees who are members of this community who typically monitor the channel Monday-Friday 9-5 PST and will offer best-effort assistance. This slack channel community support should **not** be considered a substitute for F5 Technical Support for supported templates. See the [Slack Channel Statement](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/slack-channel-statement.md) for guidelines on using this channel.
-
-## Installation
-
-You have three options for deploying this solution:
-
-- Using the Azure deploy buttons
-- Using [PowerShell](#powershell-script-example)
-- Using [CLI Tools](#azure-cli-10-script-example)
-
-### Azure deploy buttons
-
-Use the appropriate button below to deploy:
-
-- **BYOL** (bring your own license): This allows you to use an existing BIG-IP license.
-
-  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv6.0.1.0%2Fsupported%2Ffailover%2Fsame-net%2Fvia-lb%2F1nic%2Fnew-stack%2Fbyol%2Fazuredeploy.json)
 
 ### Template parameters
 
 | Parameter | Required | Description |
 | --- | --- | --- |
-| numberOfInstances | Yes | The number of BIG-IP VEs that will be deployed in front of your application(s). |
-| adminUsername | Yes | User name for the Virtual Machine. |
-| authenticationType | Yes | Type of authentication to use on the Virtual Machine, password based authentication or key based authentication. |
-| adminPasswordOrKey | Yes | Password or SSH public key to login to the Virtual Machine. Note: There are a number of special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details. Note: If using key-based authentication, this should be the public key as a string, typically starting with **---- BEGIN SSH2 PUBLIC KEY ----** and ending with **---- END SSH2 PUBLIC KEY ----**. |
-| dnsLabel | Yes | Unique DNS Name for the Public IP address used to access the Virtual Machine. |
-| instanceType | Yes | Instance size of the Virtual Machine. |
-| imageName | Yes | F5 SKU (image) to you want to deploy. Note: The disk size of the VM will be determined based on the option you select.  **Important**: If intending to provision multiple modules, ensure the appropriate value is selected, such as ****AllTwoBootLocations or AllOneBootLocation****. |
-| bigIpVersion | Yes | F5 BIG-IP version you want to use. |
-| licenseKey1 | Yes | The license token for the F5 BIG-IP VE (BYOL). |
-| licenseKey2 | Yes | The license token for the F5 BIG-IP VE (BYOL). This field is required when deploying two or more devices. |
+| prefix | Yes | This value is insert in the beginning of each Azure object, try keeps it alpha-numeric without any special character |
+| uname | Yes | User name for the Virtual Machine. |
+| upassword | Yes | Password for the Virtual Machine. |
+| location | Yes | Location of the deployment. |
+| region | Yes | Region of the deployment. |
+| cidr | Yes | IP Address range of the Virtual Network. |
+| subnet1 | Yes | Subnet IP range of the management network. |
+| subnet2 | Yes | Subnet IP range of the external network. |
+| subnet3 | No | Subnet IP range of the internal network. |
+| f5vm01mgmt | Yes | IP address for 1st BIGIP's management interface. |
+| f5vm02mgmt | Yes | IP address for 2nd BIGIP's management interface. |
+| f5vm01ext | Yes | IP address for 1st BIGIP's external interface. |
+| f5vm01ext_sec | Yes | Secondary IP address for 1st BIGIP's external interface. |
+| f5vm02ext | Yes | IP address for 2nd BIGIP's external interface. |
+| f5vm02ext_sec | Yes | Secondary IP address for 2nd BIGIP's external interface. |
+| instance_type | Yes | Azure instance to be used for the BIGIP VE. |
+| product | Yes | Azure BIGIP VE Offer. |
+| bigip_version | Yes | It is set to default to use the latest software. |
+| image_name | Yes | F5 SKU (image) to you want to deploy. Note: The disk size of the VM will be determined based on the option you select.  **Important**: If intending to provision multiple modules, ensure the appropriate value is selected, such as ****AllTwoBootLocations or AllOneBootLocation****. |
+| license1 | No | The license token for the F5 BIG-IP VE (BYOL). |
+| license2 | No | The license token for the F5 BIG-IP VE (BYOL). This field is required when deploying two or more devices. |
 | vnetAddressPrefix | Yes | The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'. |
 | ntpServer | Yes | Leave the default NTP server the BIG-IP uses, or replace the default NTP server with the one you want to use. |
 | timeZone | Yes | If you would like to change the time zone the BIG-IP uses, enter the time zone you want to use. This is based on the tz database found in /usr/share/zoneinfo (see the full list [here](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-timezone-list.md)). Example values: UTC, US/Pacific, US/Eastern, Europe/London or Asia/Singapore. |
