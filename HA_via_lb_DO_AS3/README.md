@@ -23,7 +23,7 @@ The BIG-IP VEs have the [Local Traffic Manager (LTM)](https://f5.com/products/bi
 
 ## Important configuration notes
 
-- All varialbes are configured in variable.tf 
+- All varialbes are configured in variables.tf 
 - Azure Subscription and Service Principal are configured in provider.tf
 - This template would require Declarative Onboarding and AS3 packages for the initial configuration. As part of the onboarding script, it will download the RPMs respectively. So please see the [AS3 documentation](https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/3.5.1/) and [DO documentation](https://clouddocs.f5.com/products/extensions/f5-declarative-onboarding/latest/prereqs.html) for details on how to use AS3 and Declarative Onboarding on your BIG-IP VE(s). 
 - This template uses PayGo BIGIP image for the deployment (as default). If you would like to use BYOL, then these following steps are needed:
