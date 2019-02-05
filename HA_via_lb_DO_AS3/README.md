@@ -30,8 +30,8 @@ The BIG-IP VEs have the [Local Traffic Manager (LTM)](https://f5.com/products/bi
 - This template would require Declarative Onboarding and AS3 packages for the initial configuration. As part of the onboarding script, it will download the RPMs respectively. So please see the [AS3 documentation](https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/3.5.1/) and [DO documentation](https://clouddocs.f5.com/products/extensions/f5-declarative-onboarding/latest/prereqs.html) for details on how to use AS3 and Declarative Onboarding on your BIG-IP VE(s).
 - onboard.tpl is the onboarding script, which is run by commandToExecute, and it will be copy to /var/lib/waagent/CustomData upon bootup. This script is basically responsible for downloading the neccessary DO and AS3 RPM files, installing them, and then executing the onboarding REST calls.
 - This template uses PayGo BIGIP image for the deployment (as default). If you would like to use BYOL, then these following steps are needed:
-  a) in the "variable.tf", specify the BYOL image and licenses regkeys
-  b) in the "main.tf", uncomment the "local_sku" lines
+  a) in the "variable.tf", specify the BYOL image and licenses regkeys.
+  b) in the "main.tf", uncomment the "local_sku" lines.
   c) add the following lines to the "cluster.json" file just under the "Common" declaration:
   ```
           "myLicense": {
