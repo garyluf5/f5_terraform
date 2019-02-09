@@ -36,8 +36,10 @@ variable host2_name           { default = "f5vm02"}
 variable dns_server           { default = "8.8.8.8" }
 variable ntp_server           { default = "0.us.pool.ntp.org" }
 variable timezone             { default = "UTC" }
+## Please check and update the latest DO URL from https://github.com/F5Networks/f5-declarative-onboarding/releases
 variable DO_onboard_URL	      { default = "https://raw.githubusercontent.com/F5Networks/f5-declarative-onboarding/master/dist/f5-declarative-onboarding-1.2.0-3.noarch.rpm" }
-variable AS3_URL	      { default = "https://raw.githubusercontent.com/F5Networks/f5-appsvcs-extension/master/dist/latest/f5-appsvcs-3.8.0-3.noarch.rpm" }
+## Please check and update the latest AS3 URL from https://github.com/F5Networks/f5-appsvcs-extension/releases/latest 
+variable AS3_URL	      { default = "https://raw.githubusercontent.com/F5Networks/f5-appsvcs-extension/master/dist/latest/f5-appsvcs-3.8.1-1.noarch.rpm" }
 variable libs_dir	      { default = "/config/cloud/azure/node_modules" }
 variable onboard_log	      { default = "/var/log/startup-script.log" }
 
