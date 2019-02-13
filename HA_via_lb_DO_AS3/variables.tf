@@ -21,6 +21,7 @@ variable f5vm01ext_sec  { default = "10.90.2.11" }
 variable f5vm02mgmt	{ default = "10.90.1.5" }
 variable f5vm02ext	{ default = "10.90.2.5" }
 variable f5vm02ext_sec  { default = "10.90.2.12" }
+variable backend01ext   { default = "10.90.2.101" }
 
 # BIGIP Image
 variable instance_type	{ default = "Standard_D3_v2" }
