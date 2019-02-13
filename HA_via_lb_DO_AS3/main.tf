@@ -187,6 +187,19 @@ resource "azurerm_network_security_group" "main" {
     destination_address_prefix = "*"
   }
 
+  security_rule {
+    name                       = "allow_APP_HTTPS"
+    description                = "Allow HTTPS access"
+    priority                   = 140
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "8443"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
   tags {
     Name           = "${var.environment}-bigip-sg"
     environment    = "${var.environment}"
@@ -611,11 +624,17 @@ data "azurerm_public_ip" "vm02mgmtpip" {
   resource_group_name = "${azurerm_resource_group.main.name}"
   depends_on          = ["azurerm_virtual_machine_extension.f5vm02-run-startup-cmd"]
 }
+data "azurerm_public_ip" "lbpip" {
+  name                = "${azurerm_public_ip.lbpip.name}"
+  resource_group_name = "${azurerm_resource_group.main.name}"
+  depends_on          = ["azurerm_virtual_machine_extension.f5vm02-run-startup-cmd"]
+}
 
 output "sg_id" { value = "${azurerm_network_security_group.main.id}" }
 output "sg_name" { value = "${azurerm_network_security_group.main.name}" }
 output "mgmt_subnet_gw" { value = "${local.mgmt_gw}" }
 output "ext_subnet_gw" { value = "${local.ext_gw}" }
+output "Azure_Load_Balancer_ip" { value = "${data.azurerm_public_ip.lbpip.ip_address}" }
 
 output "f5vm01_id" { value = "${azurerm_virtual_machine.f5vm01.id}"  }
 output "f5vm01_mgmt_private_ip" { value = "${azurerm_network_interface.vm01-mgmt-nic.private_ip_address}" }
